@@ -130,6 +130,9 @@ class _DetailProductState extends State<DetailProduct> {
               image: widget.ecommerce.image,
               price: widget.ecommerce.price,
               id: widget.ecommerce.id,
+              username: '',
+              password: '',
+              confirmPassword: '',
               quantity: 1,
             ),
           );

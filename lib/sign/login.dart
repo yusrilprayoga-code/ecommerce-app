@@ -1,6 +1,11 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:ecommerce_app/screens/homepage.dart';
+import 'package:ecommerce_app/sign/enkripsi_helper.dart';
+import 'package:ecommerce_app/sign/register.dart';
+import 'package:ecommerce_app/sign/user_model.dart';
+import 'package:ecommerce_app/sign/user_repo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +18,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   late bool obsecureText = true;
+  final UserRepository _userRepository = UserRepository();
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   late SharedPreferences sharedPreferences;
@@ -138,29 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: ElevatedButton(
                     onPressed: () {
-                      sharedPreferences.setBool('login', false);
-                      sharedPreferences.setString(
-                          'username', _usernameController.text);
-                      if (_usernameController.text == 'admin' &&
-                          _passwordController.text == 'admin') {
-                        printHashForAdminPassword();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MyHomePage()));
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Login Success'),
-                          backgroundColor: Colors.green,
-                        ));
-                      } else {
-                        String hashedPassword =
-                            calculateMD5(_passwordController.text);
-                        print('Hashed Password: $hashedPassword');
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Login Failed'),
-                          backgroundColor: Colors.red,
-                        ));
-                      }
+                      _login();
                     },
                     child: Text('Login'),
                     style: ElevatedButton.styleFrom(
@@ -175,11 +159,76 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   height: 20,
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Don\'t have an account?'),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return RegisterPage();
+                          },
+                        ));
+                      },
+                      child: Text('Register'),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _login() async {
+    final String username = _usernameController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (username.isNotEmpty && password.isNotEmpty) {
+      User? user = await _userRepository.getUserByUsername(username);
+
+      if (user != null) {
+        String encryptedPassword = CryptoHelper.encrypt(password);
+
+        print('Encrypted Password: $encryptedPassword');
+        if (user.password == encryptedPassword) {
+          print('Login successful');
+
+          // Simpan informasi login ke SharedPreferences
+          sharedPreferences.setBool("login", false);
+          sharedPreferences.setString("username", user.username);
+
+          // Menampilkan Snackbar untuk login berhasil
+          showSnackBar('Login successful', Colors.green);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
+        } else {
+          // Menampilkan Snackbar untuk password tidak valid
+          showSnackBar('Invalid password', Colors.red);
+          print('Invalid password');
+        }
+      } else {
+        // Menampilkan Snackbar untuk user tidak ditemukan
+        showSnackBar('User not found', Colors.red);
+        print('User not found');
+      }
+    } else {
+      // Menampilkan Snackbar untuk memasukkan username dan password
+      showSnackBar('Please enter username and password', Colors.red);
+      print('Please enter username and password');
+    }
+  }
+
+  void showSnackBar(String text, Color color) {
+    SnackBar snackBar = SnackBar(
+      content: Text(text),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

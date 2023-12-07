@@ -25,6 +25,15 @@ class CartProduct extends HiveObject {
   @HiveField(6)
   int quantity;
 
+  @HiveField(7)
+  late String username;
+
+  @HiveField(8)
+  late String password;
+
+  @HiveField(9)
+  late String confirmPassword;
+
   CartProduct(
       {required this.title,
       required this.description,
@@ -32,5 +41,8 @@ class CartProduct extends HiveObject {
       required this.image,
       required this.price,
       required this.id,
-      required this.quantity});
+      required this.quantity,
+      required this.username,
+      required this.password,
+      required this.confirmPassword});
 }

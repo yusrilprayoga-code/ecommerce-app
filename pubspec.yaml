@@ -48,6 +48,8 @@ dependencies:
   timeago: ^3.6.0
   shared_preferences: ^2.2.2
   crypto: ^3.0.3
+  image_picker: ^1.0.4
+  sqflite: ^2.0.0
 
 dependency_overrides:
   url_launcher_web: ^2.0.0

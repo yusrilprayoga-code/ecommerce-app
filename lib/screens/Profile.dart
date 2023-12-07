@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:ecommerce_app/sign/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfile extends StatefulWidget {
@@ -11,8 +14,21 @@ class MyProfile extends StatefulWidget {
 }
 
 class _MyProfileState extends State<MyProfile> {
+  String _imagePath = '';
   late String username;
   late SharedPreferences sharedPreferences;
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<String> getImage(bool isCamera) async {
+    final XFile? image;
+    if (isCamera) {
+      image = await _picker.pickImage(source: ImageSource.camera);
+    } else {
+      image = await _picker.pickImage(source: ImageSource.gallery);
+    }
+    return image!.path;
+  }
 
   @override
   void initState() {
@@ -82,19 +98,36 @@ class _MyProfileState extends State<MyProfile> {
                       bottom: 20,
                       left: 0,
                       right: 0,
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/profile.png'),
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.high,
+                      child: //get image from gallery
+                          Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            String _imagePath = await getImage(false);
+                            setState(() {
+                              this._imagePath = _imagePath;
+                            });
+                          },
+                          child: Container(
+                            height: 150,
+                            width: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 5,
+                              ),
+                              image: DecorationImage(
+                                image: _imagePath == ''
+                                    ? AssetImage(
+                                        'assets/images/profile.png',
+                                      )
+                                    : FileImage(
+                                        File(_imagePath),
+                                      ) as ImageProvider,
+                                fit: BoxFit.cover,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            ),
                           ),
                         ),
                       ),

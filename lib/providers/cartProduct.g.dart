@@ -24,13 +24,16 @@ class CartProductAdapter extends TypeAdapter<CartProduct> {
       price: fields[4] as double,
       id: fields[5] as int,
       quantity: fields[6] as int,
+      username: fields[7] as String,
+      password: fields[8] as String,
+      confirmPassword: fields[9] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, CartProduct obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -44,7 +47,13 @@ class CartProductAdapter extends TypeAdapter<CartProduct> {
       ..writeByte(5)
       ..write(obj.id)
       ..writeByte(6)
-      ..write(obj.quantity);
+      ..write(obj.quantity)
+      ..writeByte(7)
+      ..write(obj.username)
+      ..writeByte(8)
+      ..write(obj.password)
+      ..writeByte(9)
+      ..write(obj.confirmPassword);
   }
 
   @override
